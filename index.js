@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const cors = require("cors");
+const logger = require("morgan");
 
 dotenv.config();
 
@@ -10,6 +12,8 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cors());
+app.use(logger("dev"));
 
 app.use("/api", userRoutes);
 app.use("/api", messageRoutes);
