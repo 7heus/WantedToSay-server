@@ -13,6 +13,11 @@ const messageSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  color: {
+    type: String,
+    enum: ["white", "black", "cyan", "purple", "blue", "green"],
+    default: "white",
+  },
 });
 
 const Message = mongoose.model("Message", messageSchema);
