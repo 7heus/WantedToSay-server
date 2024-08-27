@@ -8,6 +8,12 @@ const Secure = new sec();
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
   const { receiver, content, secretKey } = req.body;
+  if (!secretKey) {
+    res.status(400).json({
+      message: "MISSING secretKey: Please provide an encryption key",
+    });
+    return;
+  }
 
   // receiver
   Message.create({
