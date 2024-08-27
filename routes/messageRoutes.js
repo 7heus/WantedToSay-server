@@ -2,41 +2,36 @@ const express = require("express");
 const router = express.Router();
 const Message = require("../models/messageModels");
 const User = require("../models/userModels");
+const sec = require("../lib/encryption");
+const Secure = new sec();
 
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
-  try {
-    const { receiver, content } = req.body;
+  const { receiver, content, secretKey } = req.body;
 
-    // receiver
-    const receiverUser = await User.findById(receiver);
-
-    if (!receiverUser) {
-      return res.status(404).send("Receiver not found");
-    }
-
-    const message = new Message({ receiver, content });
-    await message.save();
-    res.status(201).send(message);
-  } catch (error) {
-    res.status(400).send(error);
-  }
+  // receiver
+  Message.create({
+    receiver,
+    content: Secure.encryptData(content, secretKey),
+    secretKey: secretKey,
+  })
+    .then((msg) => res.status(201).json(msg))
+    .catch((err) => res.status(500).json({ message: err }));
 });
 
 // messages for a user
 router.get("/messages", async (req, res) => {
-  try {
-    const { userId } = req.query;
-    if (!userId) {
-      return res.status(400).send("User ID is required");
-    }
-
-    const messages = await Message.find({ receiver: userId });
-
-    res.send(messages);
-  } catch (error) {
-    res.status(500).send(error);
+  const { q } = req.query;
+  if (q) {
+    const query = q.replace("_", " ");
+    Message.find({ receiver: query })
+      .then((messages) => res.status(200).json(messages))
+      .catch((err) => res.status(500).json({ message: err }));
+    return;
   }
+  Message.find()
+    .then((messages) => res.status(200).json(messages))
+    .catch((err) => res.status(500).json({ message: err }));
 });
 
 module.exports = router;
