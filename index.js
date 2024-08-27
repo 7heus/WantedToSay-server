@@ -16,7 +16,7 @@ app.use("/api", messageRoutes);
 
 // Connect to MongoDB
 mongoose
-  .connect("mongodb://127.0.0.1:27017/mongoose-intro-dev")
+  .connect("mongodb://127.0.0.1:27017/wanted-to-say")
   .then((x) =>
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
   )
