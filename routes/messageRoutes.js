@@ -40,4 +40,22 @@ router.get("/messages", async (req, res) => {
     .catch((err) => res.status(500).json({ message: err }));
 });
 
+router.post("/messages/decrypt", async (req, res) => {
+  const { secretKey, data } = req.body;
+  if (!secretKey || !data || !Array.isArray(data)) {
+    res.status(400).json({ message: "Provide key and data" });
+    return;
+  }
+  try {
+    const decryptedWithKey = [];
+    data.map((msg) => {
+      msg.content = Secure.decryptData(msg.content, secretKey);
+      decryptedWithKey.push(msg);
+    });
+    res.status(200).json({ data: decryptedWithKey });
+  } catch (error) {
+    res.status(500).json({ message: error });
+  }
+});
+
 module.exports = router;
