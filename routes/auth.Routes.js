@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.model");
 
-const Router = express.Router();
+const router = express.Router();
 const saltRounds = 12;
 
 // POST - auth/signup - creating a new user in database
