@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema({
+  receiver: {
+    type: String,
+    default: "Anonymous receiver",
+  },
   content: {
     type: String,
     required: true,
@@ -8,10 +12,6 @@ const messageSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now,
-  },
-  secretKey: {
-    type: String,
-    required: true,
   },
 });
 
