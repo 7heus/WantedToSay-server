@@ -2,13 +2,14 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModels");
+const isAuthenticated = require("../middleware/jwt.middleware").isAuthenticated;
 
 const router = express.Router();
 const saltRounds = 12;
 
 // POST - auth/signup - creating a new user in database
 router.post("/signup", (req, res, next) => {
-  const { email, password, name } = req.body;
+  const { email, password, name, uniqueKey } = req.body;
 
   // checking if there is email and password
   if (email === "" || password === "" || name === "") {
@@ -44,13 +45,13 @@ router.post("/signup", (req, res, next) => {
 
       // creating a new user in the databse
       // We return a pending promise, which allows us to chain another `then`
-      return User.create({ email, password: hashedPassword, name });
+      return User.create({ email, password: hashedPassword, name, uniqueKey });
     })
     .then((createdUser) => {
-      const { email, name, _id } = createdUser;
+      const { email, name, _id, uniqueKey } = createdUser;
 
       // create an object that doesnot expose the password
-      const user = { email, name, _id };
+      const user = { email, name, _id, uniqueKey };
       // Send a json response containing the user object
       res.status(201).json({ user: user });
     })
@@ -84,15 +85,15 @@ router.post("/login", (req, res, next) => {
       const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
 
       if (passwordCorrect) {
-        const { _id, email, name } = foundUser;
+        const { _id, email, name, uniqueKey } = foundUser;
 
         // creating an object that will be same as  token payload
-        const payload = { _id, email, name };
+        const payload = { _id, email, name, uniqueKey };
 
         // creating and signing the token
         const authToken = jwt.sign(payload, process.env.ENCRYPT_KEY);
         // Send the token as the response
-        res.status(200).json({ authToken: authToken });
+        res.status(200).json({ authToken: authToken, payload: payload });
       } else {
         res.status(401).json({ message: "Unable to authenticate the user" });
       }
@@ -101,10 +102,9 @@ router.post("/login", (req, res, next) => {
 });
 
 // GET  /auth/verify  -  Used to verify JWT stored on the client
-router.get("/verify", (req, res, next) => {
+router.get("/verify", isAuthenticated, async (req, res, next) => {
   // If JWT token is valid the payload gets decoded by the
   // isAuthenticated middleware and made available on `req.payload`
-  console.log(`req.payload`, req.payload);
 
   // Send back the object with user data
   // previously set as the token payload
