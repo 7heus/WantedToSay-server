@@ -1,22 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const cors = require("cors");
 const logger = require("morgan");
-
-dotenv.config();
-
-const app = express();
-
-// Middleware
-app.use(express.json());
-app.use(cors());
-app.use(logger("dev"));
-
-app.use("/api", userRoutes);
-app.use("/api", messageRoutes);
+const authRoutes = require("./routes/auth.Routes");
 
 // Connect to MongoDB
 mongoose
@@ -25,6 +14,17 @@ mongoose
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
   )
   .catch((err) => console.error("Error connecting to mongo", err));
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(logger("dev"));
+
+app.use("/api", userRoutes);
+app.use("/api", messageRoutes);
+app.use("/auth", authRoutes);
 
 // Basic route
 app.get("/", (req, res) => {
