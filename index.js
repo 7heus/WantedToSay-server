@@ -7,8 +7,6 @@ const cors = require("cors");
 const logger = require("morgan");
 const helmet = require("helmet");
 
-dotenv.config();
-
 const app = express();
 
 // Middleware
@@ -20,8 +18,6 @@ app.use(express.urlencoded({ extended: false }));
 
 app.disable("x-powered-by");
 
-app.use("/api", userRoutes);
-app.use("/api", messageRoutes);
 const authRoutes = require("./routes/auth.Routes");
 
 // Connect to MongoDB
@@ -31,13 +27,6 @@ mongoose
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
   )
   .catch((err) => console.error("Error connecting to mongo", err));
-
-const app = express();
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(logger("dev"));
 
 app.use("/api", userRoutes);
 app.use("/api", messageRoutes);
