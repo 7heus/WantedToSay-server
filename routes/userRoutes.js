@@ -13,6 +13,15 @@ router.post("/users", async (req, res) => {
   }
 });
 
+router.put("/users/:id", async (req, res) => {
+  const { id } = req.params;
+  User.findByIdAndUpdate(id, req.body)
+    .then((data) => res.status(200).json(data))
+    .catch((err) =>
+      res.status(500).json({ message: `500 Internal server error`, error: err })
+    );
+});
+
 // Get all users
 router.get("/users", async (req, res) => {
   try {
