@@ -10,7 +10,7 @@ const resend = new Resend(process.env.RESEND_KEY);
 
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
-  const { receiver, content, secretKey } = req.body;
+  const { receiver, content, secretKey, color } = req.body;
   if (!secretKey) {
     res.status(400).json({
       message: "MISSING secretKey: Please provide an encryption key",
@@ -22,6 +22,7 @@ router.post("/messages", async (req, res) => {
     receiver,
     content: Secure.encryptData(content, secretKey),
     secretKey: secretKey,
+    color: color,
   })
     .then((msg) => res.status(201).json(msg))
     .catch((err) => res.status(500).json({ message: err }));
