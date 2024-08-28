@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const Message = require("../models/messageModels");
-const User = require("../models/userModels");
+const Email = require("../models/emailsModel");
 const sec = require("../lib/encryption");
 const Secure = new sec();
+require("dotenv").config();
+const Resend = require("resend").Resend;
+const resend = new Resend(process.env.RESEND_KEY);
 
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
@@ -14,7 +17,6 @@ router.post("/messages", async (req, res) => {
     });
     return;
   }
-
   // receiver
   Message.create({
     receiver,
@@ -56,6 +58,35 @@ router.post("/messages/decrypt", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error });
   }
+});
+
+router.post("/messages/email", async (req, res) => {
+  const { sentTo, data } = req.body;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!sentTo || !data) {
+    res.status(400).json({ messsage: "Please provide email and data." });
+    return;
+  }
+  if (!emailRegex.test(sentTo)) {
+    res.status(400).json({ message: "Provide a valid email address." });
+    return;
+  }
+
+  await Promise.all([
+    resend.emails.send({
+      from: "WantedToSay <onboarding@resend.dev>",
+      to: [sentTo],
+      subject: `Message for you, ${data.receiver}`,
+      html: `<h3>To ${data.receiver},</h3>
+
+      <p>${data.content}</p>`,
+    }),
+    Email.create(req.body),
+  ])
+    .then(() => res.status(201).json({ message: "Email sent successfully" }))
+    .catch((err) =>
+      res.status(500).json({ message: `500 Internal server error: ${err}` })
+    );
 });
 
 module.exports = router;
