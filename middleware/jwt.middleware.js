@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const isAuthenticated = (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1]; // get the token from headers "Bearer 123XYZ..."
-    const payload = jwt.verify(token, process.env.TOKEN_SECRET); // the verify method decodes/validates the token and returns the payload
+    const payload = jwt.verify(token, process.env.ENCRYPT_KEY); // the verify method decodes/validates the token and returns the payload
 
     req.payload = payload; // this is to pass the decoded payload to the next route as req.payload
     next();
