@@ -1,7 +1,7 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User.model");
+const User = require("../models/userModels");
 
 const router = express.Router();
 const saltRounds = 12;
@@ -26,7 +26,7 @@ router.post("/signup", (req, res, next) => {
   // using regex to validate password format
   const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
   if (!passwordRegex.test(password)) {
-    res.status(400).json({ message: "Please ptovide valid password" });
+    res.status(400).json({ message: "Please provide valid password" });
     return;
   }
 
@@ -62,7 +62,7 @@ router.post("/signup", (req, res, next) => {
 
 // Post auth-login
 // verifies email and password and return JWT
-router.post("./login", (req, res, next) => {
+router.post("/login", (req, res, next) => {
   const { email, password } = req.body;
 
   // checking if there is email and password
@@ -90,7 +90,7 @@ router.post("./login", (req, res, next) => {
         const payload = { _id, email, name };
 
         // creating and signing the token
-        const authToken = jwt.sign(payload, process.env.TOKEN_SECRET);
+        const authToken = jwt.sign(payload, process.env.ENCRYPT_KEY);
         // Send the token as the response
         res.status(200).json({ authToken: authToken });
       } else {
@@ -99,3 +99,16 @@ router.post("./login", (req, res, next) => {
     })
     .catch((err) => res.status(500).json({ message: "Internal Server Error" }));
 });
+
+// GET  /auth/verify  -  Used to verify JWT stored on the client
+router.get("/verify", (req, res, next) => {
+  // If JWT token is valid the payload gets decoded by the
+  // isAuthenticated middleware and made available on `req.payload`
+  console.log(`req.payload`, req.payload);
+
+  // Send back the object with user data
+  // previously set as the token payload
+  res.status(200).json(req.payload);
+});
+
+module.exports = router;
