@@ -51,7 +51,12 @@ router.post("/signup", (req, res, next) => {
       const { email, name, _id, uniqueKey } = createdUser;
 
       // create an object that doesnot expose the password
-      const user = { email, name, _id, uniqueKey };
+      const user = {
+        email,
+        name,
+        _id,
+        uniqueKey: uniqueKey != "" ? uniqueKey : "c001k3y",
+      };
       // Send a json response containing the user object
       res.status(201).json({ user: user });
     })
