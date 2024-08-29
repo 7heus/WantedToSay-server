@@ -88,7 +88,7 @@ router.put("/comments/:id/reactions", async (req, res) => {
     res.status(400).json({ message: "Provide a valid user ID." });
     return;
   }
-  Comment.findByIdAndUpdate(id, { $push: { reactions: userId } })
+  Comment.findByIdAndUpdate(id, { $push: { reactions: userId } }, { new: true })
     .then((data) => res.status(200).json(data))
     .catch((err) =>
       res.status(500).json({ message: "Internal server error", error: err })
@@ -106,7 +106,7 @@ router.delete("/comments/:id/reactions", async (req, res) => {
     res.status(400).json({ message: "Provide a valid user ID." });
     return;
   }
-  Comment.findByIdAndUpdate(id, { $pull: { reactions: userId } })
+  Comment.findByIdAndUpdate(id, { $pull: { reactions: userId } }, { new: true })
     .then((data) => res.status(200).json(data))
     .catch((err) =>
       res.status(500).json({ message: "Internal server error", error: err })
