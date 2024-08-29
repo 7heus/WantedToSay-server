@@ -2,8 +2,10 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModels");
+const { default: mongoose } = require("mongoose");
 const isAuthenticated = require("../middleware/jwt.middleware").isAuthenticated;
-
+const Resend = require("resend").Resend;
+const resend = new Resend(process.env.RESEND_KEY);
 const router = express.Router();
 const saltRounds = 12;
 
@@ -57,6 +59,15 @@ router.post("/signup", (req, res, next) => {
         _id,
         uniqueKey: uniqueKey != "" ? uniqueKey : "c001k3y",
       };
+      resend.emails.send({
+        from: "WantedToSay <onboarding@resend.dev>",
+        to: [email],
+        subject: `Verify your email!`,
+        html: `<h3>Email Verification for ${name}</h3>
+  
+        <p>Hello, ${name}! Welcome to WTS.</p>
+        <p><a href="http://localhost:5173/email/verify/${_id}" target="_blank">Verify your email</a> here.</p>`,
+      });
       // Send a json response containing the user object
       res.status(201).json({ user: user });
     })
@@ -114,6 +125,38 @@ router.get("/verify", isAuthenticated, async (req, res, next) => {
   // Send back the object with user data
   // previously set as the token payload
   res.status(200).json(req.payload);
+});
+
+router.post("/email/verify", async (req, res, next) => {
+  const { _id } = req.body;
+  if (!mongoose.isValidObjectId(_id)) {
+    res.status(400).json({ message: "Provide a valid ID" });
+    return;
+  }
+  let isV = false;
+  User.findById(_id)
+    .then((usr) => (isV = usr.isVerified))
+    .catch((err) => {
+      res.status(500).json({
+        message: "500 Internal server error when fetching user",
+        error: err,
+      });
+      return;
+    });
+  if (isV) {
+    res.status(418).json({ message: "User is already verified." });
+    return;
+  }
+  User.findByIdAndUpdate(_id, { isVerified: true })
+    .then(() => {
+      res.status(200).json({ message: "User was verified successfully" });
+    })
+    .catch((err) =>
+      res.status(500).json({
+        message: "500 Internal Server Error when updating user",
+        error: err,
+      })
+    );
 });
 
 module.exports = router;
