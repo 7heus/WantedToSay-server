@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const userRoutes = require("./routes/userRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const commentRoutes = require("./routes/commentRoutes");
 const cors = require("cors");
 const logger = require("morgan");
 const helmet = require("helmet");
@@ -31,6 +32,7 @@ mongoose
 app.use("/api", userRoutes);
 app.use("/api", messageRoutes);
 app.use("/auth", authRoutes);
+app.use("/api", commentRoutes);
 
 // Basic route
 app.get("/", (req, res) => {

@@ -7,6 +7,7 @@ const Secure = new sec();
 require("dotenv").config();
 const Resend = require("resend").Resend;
 const resend = new Resend(process.env.RESEND_KEY);
+const mongoose = require("mongoose");
 
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
@@ -41,6 +42,21 @@ router.get("/messages", async (req, res) => {
   Message.find()
     .then((messages) => res.status(200).json(messages))
     .catch((err) => res.status(500).json({ message: err }));
+});
+
+router.get("/messages/:msgId", async (req, res) => {
+  const { msgId } = req.params;
+  if (!mongoose.isValidObjectId(msgId)) {
+    res.status(400).json({ message: "Provide a valid post ID." });
+    return;
+  }
+  Message.findById(msgId)
+    .then((msg) => res.status(200).json(msg))
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ message: "500 - Internal server error", error: err })
+    );
 });
 
 router.post("/messages/decrypt", async (req, res) => {
