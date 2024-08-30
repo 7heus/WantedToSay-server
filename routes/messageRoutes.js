@@ -8,6 +8,8 @@ require("dotenv").config();
 const Resend = require("resend").Resend;
 const resend = new Resend(process.env.RESEND_KEY);
 const mongoose = require("mongoose");
+const User = require("../models/userModels");
+const frontendURL = "http://localhost:5173";
 
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
@@ -25,7 +27,22 @@ router.post("/messages", async (req, res) => {
     secretKey: secretKey,
     color: color,
   })
-    .then((msg) => res.status(201).json(msg))
+    .then((msg) => {
+      res.status(201).json(msg);
+      User.findOne({ name: receiver }).then((data) => {
+        if (data) {
+          resend.emails.send({
+            from: "WantedToSay <onboarding@resend.dev>",
+            to: [data.email],
+            subject: `Someone has posted a message to your name!`,
+            html: `<h3>Hey, ${data.name}!</h3>
+            <h6>Someone has posted a message to a '${data.name}'. Could it be you?</h6>
+      
+            <p>Check it out! <a href="${frontendURL}/messages/${msg._id}" target="_blank">Click here</a></p>`,
+          });
+        }
+      });
+    })
     .catch((err) => res.status(500).json({ message: err }));
 });
 
