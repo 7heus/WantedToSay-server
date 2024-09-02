@@ -79,7 +79,7 @@ router.delete("/comments/:id", async (req, res) => {
 
 router.put("/comments/:id/reactions", async (req, res) => {
   const { id } = req.params;
-  const { userId } = req.body;
+  const { userId, action } = req.body;
   if (!mongoose.isValidObjectId(id)) {
     res.status(400).json({ message: "Provide a valid comment ID." });
     return;
@@ -88,29 +88,30 @@ router.put("/comments/:id/reactions", async (req, res) => {
     res.status(400).json({ message: "Provide a valid user ID." });
     return;
   }
-  Comment.findByIdAndUpdate(id, { $push: { reactions: userId } }, { new: true })
-    .then((data) => res.status(200).json(data))
-    .catch((err) =>
-      res.status(500).json({ message: "Internal server error", error: err })
-    );
-});
-
-router.delete("/comments/:id/reactions", async (req, res) => {
-  const { id } = req.params;
-  const { userId } = req.body;
-  if (!mongoose.isValidObjectId(id)) {
-    res.status(400).json({ message: "Provide a valid comment ID." });
+  if (action === "push") {
+    Comment.findByIdAndUpdate(
+      id,
+      { $push: { reactions: userId } },
+      { new: true }
+    )
+      .then((data) => res.status(200).json(data))
+      .catch((err) =>
+        res.status(500).json({ message: "Internal server error", error: err })
+      );
+  } else if (action === "pull") {
+    Comment.findByIdAndUpdate(
+      id,
+      { $pull: { reactions: userId } },
+      { new: true }
+    )
+      .then((data) => res.status(200).json(data))
+      .catch((err) =>
+        res.status(500).json({ message: "Internal server error", error: err })
+      );
+  } else {
+    res.status(400).json({ message: "Provide a valid action." });
     return;
   }
-  if (!mongoose.isValidObjectId(userId)) {
-    res.status(400).json({ message: "Provide a valid user ID." });
-    return;
-  }
-  Comment.findByIdAndUpdate(id, { $pull: { reactions: userId } }, { new: true })
-    .then((data) => res.status(200).json(data))
-    .catch((err) =>
-      res.status(500).json({ message: "Internal server error", error: err })
-    );
 });
 
 module.exports = router;
