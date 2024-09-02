@@ -32,7 +32,7 @@ router.post("/messages", async (req, res) => {
       User.findOne({ name: receiver }).then((data) => {
         if (data) {
           resend.emails.send({
-            from: "WantedToSay <onboarding@resend.dev>",
+            from: "WantedToSay <onboarding@wantedtosay.thecoded.tech>",
             to: [data.email],
             subject: `Someone has posted a message to your name!`,
             html: `<h3>Hey, ${data.name}!</h3>

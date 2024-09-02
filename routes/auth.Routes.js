@@ -60,7 +60,7 @@ router.post("/signup", (req, res, next) => {
         uniqueKey: uniqueKey != "" ? uniqueKey : "c001k3y",
       };
       resend.emails.send({
-        from: "WantedToSay <onboarding@resend.dev>",
+        from: "WantedToSay <onboarding@wantedtosay.thecoded.tech>",
         to: [email],
         subject: `Verify your email!`,
         html: `<h3>Email Verification for ${name}</h3>
