@@ -84,7 +84,7 @@ router.post("/login", (req, res, next) => {
 
   // checking if there is email and password
   if (email === "" || password === "") {
-    res.status(400).json({ message: "Please provide emailid and password" });
+    res.status(400).json({ message: "Please provide email and password" });
     return;
   }
 
