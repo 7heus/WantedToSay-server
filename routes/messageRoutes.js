@@ -36,7 +36,7 @@ router.post("/messages", async (req, res) => {
             to: data.map((x) => x.email),
             subject: `Someone has posted a message to your name!`,
             html: `<h3>Hey, ${data[0].name}!</h3>
-            <h6>Someone has posted a message to a '${data.name}'. Could it be you?</h6>
+            <h6>Someone has posted a message to a '${data[0].name}'. Could it be you?</h6>
       
             <p>Check it out! <a href="${frontendURL}/messages/${msg._id}" target="_blank">Click here</a></p>`,
           });
