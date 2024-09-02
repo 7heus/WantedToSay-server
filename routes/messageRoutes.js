@@ -29,13 +29,13 @@ router.post("/messages", async (req, res) => {
   })
     .then((msg) => {
       res.status(201).json(msg);
-      User.findOne({ name: receiver }).then((data) => {
+      User.find({ name: receiver }).then((data) => {
         if (data) {
           resend.emails.send({
             from: "WantedToSay <onboarding@wantedtosay.thecoded.tech>",
-            to: [data.email],
+            to: data.map((x) => x.email),
             subject: `Someone has posted a message to your name!`,
-            html: `<h3>Hey, ${data.name}!</h3>
+            html: `<h3>Hey, ${data[0].name}!</h3>
             <h6>Someone has posted a message to a '${data.name}'. Could it be you?</h6>
       
             <p>Check it out! <a href="${frontendURL}/messages/${msg._id}" target="_blank">Click here</a></p>`,
