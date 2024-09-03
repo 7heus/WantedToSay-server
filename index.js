@@ -23,7 +23,7 @@ const authRoutes = require("./routes/auth.Routes");
 
 // Connect to MongoDB
 mongoose
-  .connect("mongodb://127.0.0.1:27017/wanted-to-say")
+  .connect(process.env.MONGO_URL)
   .then((x) =>
     console.log(`Connected to Mongo! Database name: "${x.connections[0].name}"`)
   )
