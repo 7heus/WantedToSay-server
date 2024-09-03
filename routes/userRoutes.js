@@ -37,14 +37,13 @@ router.get("/users/:id", async (req, res) => {
 
   await User.findById(id)
     .then((data) =>
-      res
-        .status(200)
-        .json({
-          _id: data._id,
-          email: data.email,
-          name: data.name,
-          uniqueKey: data.uniqueKey,
-        })
+      res.status(200).json({
+        _id: data._id,
+        email: data.email,
+        name: data.name,
+        uniqueKey: data.uniqueKey,
+        isVerified: data.isVerified,
+      })
     )
     .catch((err) =>
       res.status(500).json({ message: "internal server error", error: err })
