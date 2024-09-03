@@ -5,6 +5,8 @@ const User = require("../models/userModels");
 const { default: mongoose } = require("mongoose");
 const isAuthenticated = require("../middleware/jwt.middleware").isAuthenticated;
 const Resend = require("resend").Resend;
+const VerifyCode = require("../models/verificationCode.model");
+
 const resend = new Resend(process.env.RESEND_KEY);
 const router = express.Router();
 const saltRounds = 12;
@@ -47,7 +49,12 @@ router.post("/signup", (req, res, next) => {
 
       // creating a new user in the databse
       // We return a pending promise, which allows us to chain another `then`
-      return User.create({ email, password: hashedPassword, name, uniqueKey });
+      return User.create({
+        email,
+        password: hashedPassword,
+        name,
+        uniqueKey: uniqueKey != "" ? uniqueKey : "c001k3y",
+      });
     })
     .then((createdUser) => {
       const { email, name, _id, uniqueKey } = createdUser;
@@ -157,6 +164,125 @@ router.post("/email/verify", async (req, res, next) => {
         error: err,
       })
     );
+});
+
+router.post("/create-code", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: "Please provide email" });
+    return;
+  }
+  const possibleChars = "ABCDEFGHIKJLMNOPQRSTUVWXYZ0123456789".split("");
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    const rand = Math.floor(Math.random() * possibleChars.length);
+    code = `${code}${possibleChars[rand]}`;
+  }
+  User.findOne({ email: email })
+    .then((user) => {
+      if (!user) {
+        res.status(404).json({ message: "User not found." });
+        return;
+      }
+      VerifyCode.create({ email, code })
+        .then(() => {
+          res.status(201).json({ message: "Code Sent" });
+          resend.emails.send({
+            from: "WantedToSay <onboarding@wantedtosay.thecoded.tech>",
+            to: [email],
+            subject: `Verification Code`,
+            html: `<h3>Verification code for password change</h3>
+        
+        <h1>${code}</h1>`,
+          });
+          return code;
+        })
+        .catch((err) => res.status(500).json(err));
+    })
+    .catch((err) =>
+      res.status(500).json({
+        message: "500 Internal Server Error when creating code",
+        error: err,
+      })
+    );
+});
+
+router.post("/get-code", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: "Please provide email" });
+    return;
+  }
+  VerifyCode.findOne({ email: email })
+    .then((data) => {
+      if (!data) {
+        res.status(400).json({ message: "No code found" });
+        return;
+      }
+      res.status(200).json({ code: data.code });
+    })
+    .catch((err) => res.status(500).json(err));
+});
+
+router.put("/update-pass", async (req, res) => {
+  const { email, code, newPass } = req.body;
+  if (!email || !code || !newPass) {
+    res
+      .status(400)
+      .json({ message: "Please provide email, code, and new password." });
+    return;
+  }
+
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hashedPassword = bcrypt.hashSync(newPass, salt);
+
+  VerifyCode.findOne({ code: code })
+    .then((data) => {
+      if (data && data.code === code) {
+        return User.findOneAndUpdate(
+          { email: email },
+          { password: hashedPassword },
+          { new: true }
+        )
+          .then((usr) => {
+            if (!usr) {
+              res.status(404).json({ message: "User not found" });
+              return;
+            }
+            // const { email, name, _id, uniqueKey } = usr;
+            // create an object that doesnot expose the password
+            const user = {
+              email: usr.email,
+              name: usr.name,
+              _id: usr._id,
+              uniqueKey: usr.uniqueKey,
+            };
+            resend.emails.send({
+              from: "WantedToSay <onboarding@wantedtosay.thecoded.tech>",
+              to: [email],
+              subject: `Password change`,
+              html: `<h3>Hello, ${usr.name}!</h3>
+
+            <p>Your password in our website has been successfully updated.</p>
+            <p>Wasn't you? Please update your password again if so.</p>`,
+            });
+            return user;
+          })
+          .catch((err) => {
+            res.status(500).json(err);
+            return;
+          });
+      } else {
+        res.status(403).json({ message: "Invalid or expired code." });
+        return;
+      }
+    })
+    .then((user) => {
+      if (!user) return;
+      VerifyCode.findOneAndDelete({ email: user.email }).then((dat) =>
+        console.log(dat)
+      );
+    });
 });
 
 module.exports = router;
