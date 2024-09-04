@@ -226,7 +226,9 @@ router.post("/create-code", async (req, res) => {
           });
           return code;
         })
-        .catch((err) => res.status(500).json(err));
+        .catch((err) => {
+          return;
+        });
     })
     .catch((err) =>
       res.status(500).json({
@@ -256,14 +258,18 @@ router.post("/get-code", async (req, res) => {
 router.put("/update-pass", async (req, res) => {
   const { email, code, newPass } = req.body;
   if (!email || !code || !newPass) {
-    res
-      .status(400)
-      .json({ message: "Please provide email, code, and new password." });
+    res.status(400).json({
+      message: "Please provide email, code, and new password.",
+      statusCode: res.statusCode,
+    });
     return;
   }
   const passwordRegex = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,}/;
   if (!passwordRegex.test(newPass)) {
-    res.status(400).json({ message: "Please provide valid password" });
+    res.status(400).json({
+      message: "Please provide valid password",
+      statusCode: res.statusCode,
+    });
     return;
   }
 
@@ -316,7 +322,7 @@ router.put("/update-pass", async (req, res) => {
             return user;
           })
           .catch((err) => {
-            res.status(500).json(err);
+            res.status(500).json({ status: res.statusCode, error: err });
             return;
           });
       } else {

@@ -73,7 +73,7 @@ router.post("/users/email/findOne", async (req, res) => {
         name: user.name,
         uniqueKey: user.uniqueKey,
         isVerified: user.isVerified,
-        avatar: data.avatar,
+        avatar: user.avatar,
       });
     })
     .catch((err) =>
