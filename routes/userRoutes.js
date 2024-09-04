@@ -51,6 +51,7 @@ router.get("/users/:id", async (req, res) => {
         name: data.name,
         uniqueKey: data.uniqueKey,
         isVerified: data.isVerified,
+        avatar: data.avatar,
       })
     )
     .catch((err) =>
@@ -72,6 +73,7 @@ router.post("/users/email/findOne", async (req, res) => {
         name: user.name,
         uniqueKey: user.uniqueKey,
         isVerified: user.isVerified,
+        avatar: data.avatar,
       });
     })
     .catch((err) =>

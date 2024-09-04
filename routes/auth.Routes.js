@@ -13,10 +13,10 @@ const saltRounds = 12;
 
 // POST - auth/signup - creating a new user in database
 router.post("/signup", (req, res, next) => {
-  const { email, password, name, uniqueKey } = req.body;
+  const { email, password, name, uniqueKey, avatar } = req.body;
 
   // checking if there is email and password
-  if (email === "" || password === "" || name === "") {
+  if (email === "" || password === "" || name === "" || avatar === "") {
     res.status(400).json({ message: "Please fill in all the fields" });
     return;
   }
@@ -54,10 +54,11 @@ router.post("/signup", (req, res, next) => {
         password: hashedPassword,
         name,
         uniqueKey: uniqueKey != "" ? uniqueKey : "c001k3y",
+        avatar: avatar,
       });
     })
     .then((createdUser) => {
-      const { email, name, _id, uniqueKey } = createdUser;
+      const { email, name, _id, uniqueKey, avatar } = createdUser;
 
       // create an object that doesnot expose the password
       const user = {
@@ -65,6 +66,7 @@ router.post("/signup", (req, res, next) => {
         name,
         _id,
         uniqueKey: uniqueKey != "" ? uniqueKey : "c001k3y",
+        avatar: avatar,
       };
       resend.emails.send({
         from: "WantedToSay <onboarding@wantedtosay.thecoded.tech>",
@@ -121,10 +123,10 @@ router.post("/login", (req, res, next) => {
       const passwordCorrect = bcrypt.compareSync(password, foundUser.password);
 
       if (passwordCorrect) {
-        const { _id, email, name, uniqueKey } = foundUser;
+        const { _id, email, name, uniqueKey, avatar } = foundUser;
 
         // creating an object that will be same as  token payload
-        const payload = { _id, email, name, uniqueKey };
+        const payload = { _id, email, name, uniqueKey, avatar };
 
         // creating and signing the token
         const authToken = jwt.sign(payload, process.env.ENCRYPT_KEY);
