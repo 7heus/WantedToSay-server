@@ -6,6 +6,7 @@ const { default: mongoose } = require("mongoose");
 const isAuthenticated = require("../middleware/jwt.middleware").isAuthenticated;
 const Resend = require("resend").Resend;
 const VerifyCode = require("../models/verificationCode.model");
+const siteLink = "https://wantedtosay.netlify.app";
 
 const resend = new Resend(process.env.RESEND_KEY);
 const router = express.Router();
@@ -78,10 +79,10 @@ router.post("/signup", (req, res, next) => {
         <p>Hi <strong>${user.name}</strong>,</p>
         <p>Thank you for signing up for WantedToSay! To complete your registration, please verify your email address by clicking the button below:</p>
         <div style="text-align: center; margin: 20px 0;">
-            <a href="http://localhost:5173/email/verify/${user._id}" style="display: inline-block; background-color: #28a745; color: #ffffff; font-size: 18px; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Verify My Email</a>
+            <a href="${siteLink}/email/verify/${user._id}" style="display: inline-block; background-color: #28a745; color: #ffffff; font-size: 18px; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Verify My Email</a>
         </div>
         <p>If the above button doesn't work, please copy and paste the following URL into your browser:</p>
-        <p style="text-align: center; color: #007bff;">http://localhost:5173/email/verify/${user._id}</p>
+        <p style="text-align: center; color: #007bff;">https://wantedtosay.netlify.app/email/verify/${user._id}</p>
         <p>If you didn’t sign up for WantedToSay, please ignore this email.</p>
         <p style="margin-top: 40px;">Thank you for joining our community! We’re excited to have you with us.</p>
         <p>Best regards,<br>The WantedToSay Team</p>
@@ -308,7 +309,7 @@ router.put("/update-pass", async (req, res) => {
         <p>We wanted to let you know that your WantedToSay account password was successfully changed. If you made this change, no further action is needed.</p>
         <p>If you did not change your password, please reset it immediately by clicking the link below:</p>
         <div style="text-align: center; margin: 20px 0;">
-            <a href="http://localhost:5173/reset-password" style="display: inline-block; background-color: #dc3545; color: #ffffff; font-size: 18px; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Reset My Password</a>
+            <a href="${siteLink}/reset-password" style="display: inline-block; background-color: #dc3545; color: #ffffff; font-size: 18px; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Reset My Password</a>
         </div>
         <p>For added security, we recommend reviewing your account settings and updating your security information.</p>
         <p>If you need any help or have concerns, feel free to reach out to our support team.</p>

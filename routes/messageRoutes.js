@@ -8,7 +8,7 @@ const Resend = require("resend").Resend;
 const resend = new Resend(process.env.RESEND_KEY);
 const mongoose = require("mongoose");
 const User = require("../models/userModels");
-const frontendURL = "http://localhost:5173";
+const frontendURL = "https://wantedtosay.netlify.app";
 
 // Anonymous Sender
 router.post("/messages", async (req, res) => {
