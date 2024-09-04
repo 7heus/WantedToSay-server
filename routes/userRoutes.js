@@ -15,6 +15,10 @@ router.post("/users", async (req, res) => {
 
 router.put("/users/:id", async (req, res) => {
   const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ message: "Please provide id" });
+    return;
+  }
   User.findByIdAndUpdate(id, req.body)
     .then((data) => res.status(200).json(data))
     .catch((err) =>
@@ -34,6 +38,10 @@ router.get("/users", async (req, res) => {
 
 router.get("/users/:id", async (req, res) => {
   const { id } = req.params;
+  if (!id) {
+    res.status(400).json({ message: "Please provide id" });
+    return;
+  }
 
   await User.findById(id)
     .then((data) =>
@@ -45,6 +53,27 @@ router.get("/users/:id", async (req, res) => {
         isVerified: data.isVerified,
       })
     )
+    .catch((err) =>
+      res.status(500).json({ message: "internal server error", error: err })
+    );
+});
+
+router.post("/users/email/findOne", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ message: "Please provide email" });
+    return;
+  }
+  User.findOne({ email: email })
+    .then((user) => {
+      res.status(200).json({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        uniqueKey: user.uniqueKey,
+        isVerified: user.isVerified,
+      });
+    })
     .catch((err) =>
       res.status(500).json({ message: "internal server error", error: err })
     );
