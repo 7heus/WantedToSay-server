@@ -15,7 +15,7 @@ const messageSchema = new mongoose.Schema({
   },
   color: {
     type: String,
-    enum: ["white", "black", "cyan", "purple", "blue", "green"],
+    default: "#FFFFFF",
     required: true,
   },
 });
