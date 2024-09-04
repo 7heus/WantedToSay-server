@@ -17,6 +17,7 @@ const messageSchema = new mongoose.Schema({
     type: String,
     default: "#FFFFFF",
     required: true,
+    validate: /^#?([A-F0-9]{6}|[A-F0-9]{3})$/,
   },
 });
 
